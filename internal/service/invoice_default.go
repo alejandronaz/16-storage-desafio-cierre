@@ -24,3 +24,9 @@ func (s *InvoicesDefault) Save(i *internal.Invoice) (err error) {
 	err = s.rp.Save(i)
 	return
 }
+
+// UpdateTotalPrice updates the total price of all invoices.
+func (s *InvoicesDefault) UpdateTotalPrice() (err error) {
+	err = s.rp.UpdateTotalPrice()
+	return
+}

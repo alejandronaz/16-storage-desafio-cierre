@@ -6,4 +6,6 @@ type RepositoryInvoice interface {
 	FindAll() (i []Invoice, err error)
 	// Save saves an invoice
 	Save(i *Invoice) (err error)
+	// UpdateTotalPrice updates the total price of all invoices
+	UpdateTotalPrice() (err error)
 }
