@@ -67,3 +67,35 @@ func (r *ProductsMySQL) Save(p *internal.Product) (err error) {
 
 	return
 }
+
+// GetTopProducts returns the top 5 products by quantity sold.
+func (r *ProductsMySQL) GetTopProducts() (p []internal.Product, err error) {
+	// query
+	query := `
+		SELECT p.id, p.description, p.price
+		FROM products p JOIN sales s ON (p.id = s.product_id)
+		GROUP BY p.id, p.description, p.price
+		ORDER BY SUM(s.quantity) DESC
+		LIMIT 5
+	`
+	// execute the query
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	// iterate over the rows
+	for rows.Next() {
+		// scan the row into the product
+		var pr internal.Product
+		err := rows.Scan(&pr.Id, &pr.Description, &pr.Price)
+		if err != nil {
+			return nil, err
+		}
+		// append the product to the slice
+		p = append(p, pr)
+	}
+
+	return
+
+}
