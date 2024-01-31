@@ -1,7 +1,6 @@
 package application
 
 import (
-	"app/docs/db/loader"
 	"app/internal/handler"
 	"app/internal/repository"
 	"app/internal/service"
@@ -73,14 +72,6 @@ func (a *ApplicationDefault) SetUp() (err error) {
 	rpProduct := repository.NewProductsMySQL(a.db)
 	rpInvoice := repository.NewInvoicesMySQL(a.db)
 	rpSale := repository.NewSalesMySQL(a.db)
-
-	// load data
-	// - loader
-	loader := loader.NewLoaderDefault(a.db)
-	err = loader.LoadFromJSON()
-	if err != nil {
-		return
-	}
 
 	// - service
 	svCustomer := service.NewCustomersDefault(rpCustomer)
