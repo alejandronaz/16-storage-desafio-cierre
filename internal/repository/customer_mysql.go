@@ -68,3 +68,34 @@ func (r *CustomersMySQL) Save(c *internal.Customer) (err error) {
 
 	return
 }
+
+// GetTopCustomers returns the top 5 customers by quantity of purchases.
+func (r *CustomersMySQL) GetTopCustomers() (c []internal.Customer, err error) {
+	// query
+	query := `
+		SELECT c.id, c.first_name, c.last_name, c.condition
+		FROM customers c JOIN invoices i ON (c.id = i.customer_id)
+		GROUP BY c.id, c.first_name, c.last_name, c.condition
+		ORDER BY SUM(i.total) DESC
+		LIMIT 5
+	`
+	// execute the query
+	rows, err := r.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	// iterate over the rows
+	for rows.Next() {
+		// scan the row into the customer
+		var cust internal.Customer
+		err := rows.Scan(&cust.Id, &cust.FirstName, &cust.LastName, &cust.Condition)
+		if err != nil {
+			return nil, err
+		}
+		// append the customer to the slice
+		c = append(c, cust)
+	}
+
+	return
+}
