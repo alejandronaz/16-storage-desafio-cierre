@@ -27,6 +27,7 @@ type CustomerJSON struct {
 	LastName  string `json:"last_name"`
 	Condition int    `json:"condition"`
 }
+
 // GetAll returns all customers
 func (h *CustomersDefault) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -65,6 +66,7 @@ type RequestBodyCustomer struct {
 	LastName  string `json:"last_name"`
 	Condition int    `json:"condition"`
 }
+
 // Create creates a new customer
 func (h *CustomersDefault) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -106,4 +108,31 @@ func (h *CustomersDefault) Create() http.HandlerFunc {
 			"data":    cs,
 		})
 	}
+}
+
+// GetTopCustomers returns the top 5 customers by quantity of purchases.
+func (h *CustomersDefault) GetTopCustomers(w http.ResponseWriter, r *http.Request) {
+	// call the service
+	customers, err := h.sv.GetTopCustomers()
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, "error getting top customers")
+		return
+	}
+
+	// serialize
+	var customersJSON []CustomerJSON
+	for _, customer := range customers {
+		customersJSON = append(customersJSON, CustomerJSON{
+			Id:        customer.Id,
+			FirstName: customer.FirstName,
+			LastName:  customer.LastName,
+			Condition: customer.Condition,
+		})
+	}
+
+	// response
+	response.JSON(w, http.StatusOK, map[string]any{
+		"message": "top customers found",
+		"data":    customersJSON,
+	})
 }

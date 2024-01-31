@@ -24,3 +24,9 @@ func (s *CustomersDefault) Save(c *internal.Customer) (err error) {
 	err = s.rp.Save(c)
 	return
 }
+
+// GetTopCustomers returns the top 5 customers by quantity of purchases.
+func (s *CustomersDefault) GetTopCustomers() (c []internal.Customer, err error) {
+	c, err = s.rp.GetTopCustomers()
+	return
+}
