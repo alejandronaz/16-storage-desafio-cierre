@@ -8,4 +8,6 @@ type RepositoryInvoice interface {
 	Save(i *Invoice) (err error)
 	// UpdateTotalPrice updates the total price of all invoices
 	UpdateTotalPrice() (err error)
+	// GetTotalPriceByCondition returns the total price of all invoices that match the condition
+	GetTotalPriceByCondition(condition int) (total float64, err error)
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	"app/internal"
 )
@@ -111,5 +112,36 @@ func (r *InvoicesMySQL) UpdateTotalPrice() (err error) {
 	}
 
 	return nil
+
+}
+
+// GetTotalPriceByCondition returns the total price of all invoices that match the condition
+func (i *InvoicesMySQL) GetTotalPriceByCondition(condition int) (total float64, err error) {
+
+	// query to retrieve the total price by customer condition
+	query := `
+		SELECT SUM(i.total)
+		FROM customers c 
+			JOIN invoices i ON (c.id = i.customer_id)
+		WHERE c.condition = ?
+	`
+
+	// execute the query
+	row := i.db.QueryRow(query, condition)
+	if row.Err() != nil {
+		return 0, row.Err()
+	}
+
+	// scan the row into the total
+	err = row.Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+
+	// round total to 2 decimals
+	twoDec := fmt.Sprintf("%.2f", total)
+	total, _ = strconv.ParseFloat(twoDec, 64)
+
+	return total, nil
 
 }
