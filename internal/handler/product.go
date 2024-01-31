@@ -25,6 +25,7 @@ type ProductJSON struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 }
+
 // GetAll returns all products
 func (h *ProductsDefault) GetAll() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +61,7 @@ type RequestBodyProduct struct {
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
 }
+
 // Create creates a new product
 func (h *ProductsDefault) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -99,4 +101,30 @@ func (h *ProductsDefault) Create() http.HandlerFunc {
 			"data":    pr,
 		})
 	}
+}
+
+// GetTopProducts returns the top 5 products by quantity sold
+func (h *ProductsDefault) GetTopProducts(w http.ResponseWriter, r *http.Request) {
+	// call the service
+	prods, err := h.sv.GetTopProducts()
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, "error getting top products")
+		return
+	}
+
+	// serialize
+	var prodsJSON []ProductJSON
+	for _, prod := range prods {
+		prodsJSON = append(prodsJSON, ProductJSON{
+			Id:          prod.Id,
+			Description: prod.Description,
+			Price:       prod.Price,
+		})
+	}
+
+	// response
+	response.JSON(w, http.StatusOK, map[string]any{
+		"message": "top products found",
+		"data":    prodsJSON,
+	})
 }
