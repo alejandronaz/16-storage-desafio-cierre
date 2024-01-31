@@ -73,42 +73,19 @@ func (r *InvoicesMySQL) Save(i *internal.Invoice) (err error) {
 // UpdateTotalPrice updates the total price of all invoices.
 func (r *InvoicesMySQL) UpdateTotalPrice() (err error) {
 
-	// query to retrieve the total of each invoice
+	// query to update the total price of all invoices
 	queryTotal := `
-			SELECT t.invoice_id, SUM(t.total)
-			FROM (
-				SELECT i.id as invoice_id, s.id as sale_id, s.quantity * SUM(p.price) as total
-				FROM invoices AS i
-					JOIN sales s ON (i.id = s.invoice_id)
-					JOIN products p ON (s.product_id = p.id)
-				GROUP BY i.id, s.id, s.quantity
-				) AS t
-			GROUP BY t.invoice_id
+		UPDATE invoices i 
+		SET total = (
+			SELECT SUM(s.quantity * p.price) 
+			FROM sales s JOIN products p ON (s.product_id = p.id) 
+			WHERE s.invoice_id = i.id
+		)
 	`
-	rows, err := r.db.Query(queryTotal)
+	_, err = r.db.Exec(queryTotal)
 	if err != nil {
 		fmt.Println(err)
 		return err
-	}
-
-	// iterate over the rows and update the total of each invoice
-	for rows.Next() {
-
-		// scan the row into the id and total
-		var id int
-		var total float64
-		err = rows.Scan(&id, &total)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-
-		// update the total of this invoice
-		_, err = r.db.Exec("UPDATE invoices SET total = ? WHERE id = ?", total, id)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
 	}
 
 	return nil
