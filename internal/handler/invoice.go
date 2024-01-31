@@ -2,10 +2,13 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"app/internal"
 	"app/platform/web/request"
 	"app/platform/web/response"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // NewInvoicesDefault returns a new InvoicesDefault
@@ -120,5 +123,31 @@ func (h *InvoicesDefault) UpdateTotalPrice(w http.ResponseWriter, r *http.Reques
 	// response
 	response.JSON(w, http.StatusOK, map[string]any{
 		"message": "total price updated",
+	})
+}
+
+// GetTotalPriceByCondition returns the total price of all invoices that match the condition
+func (h *InvoicesDefault) GetTotalPriceByCondition(w http.ResponseWriter, r *http.Request) {
+	// get path param
+	condition := chi.URLParam(r, "condition")
+
+	// parse to int
+	conditionInt, err := strconv.Atoi(condition)
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, "error parsing condition; must be integer")
+		return
+	}
+
+	// call the service
+	total, err := h.sv.GetTotalPriceByCondition(conditionInt)
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, "error getting total price")
+		return
+	}
+
+	// response
+	response.JSON(w, http.StatusOK, map[string]any{
+		"message": "success",
+		"data":    total,
 	})
 }

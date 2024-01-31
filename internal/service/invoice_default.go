@@ -30,3 +30,9 @@ func (s *InvoicesDefault) UpdateTotalPrice() (err error) {
 	err = s.rp.UpdateTotalPrice()
 	return
 }
+
+// GetTotalPriceByCondition returns the total price of all invoices that match the condition.
+func (s *InvoicesDefault) GetTotalPriceByCondition(condition int) (total float64, err error) {
+	total, err = s.rp.GetTotalPriceByCondition(condition)
+	return
+}
